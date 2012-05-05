@@ -3,7 +3,7 @@ require 'rake/tasklib'
 
 module ReleaseOps
   module YardTasks
-    include ::Rake::DSL if defined?(::Rake::DSL)
+    extend ::Rake::DSL if defined?(::Rake::DSL)
 
     # defines yard-relates tasks under the 'yard' namespace
     #
@@ -39,5 +39,5 @@ module ReleaseOps
   end
 end
 
-require_relative 'releaseops/test_multiple_rubies'
+require_relative 'releaseops/test_tasks'
 
