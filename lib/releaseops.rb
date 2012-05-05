@@ -2,43 +2,13 @@ require 'rake'
 require 'rake/tasklib'
 
 module ReleaseOps
-  module YardTasks
-    extend ::Rake::DSL if defined?(::Rake::DSL)
-
-    # defines yard-relates tasks under the 'yard' namespace
-    #
-    # @option opts [String,Symbol] :namespace (:yard) what namespace should we
-    #   define our taks in?
-    # @option opts [Integer] :port (8808) what port to serve documentation on
-    # @option opts [Integer] :gem_port (8809) what port to serve this project's
-    #   gem documentation on
-    #
-    def self.define(opts={})
-      port      = opts[:port]
-      gem_port  = opts.fetch(:gem_port, 8809)
-      ns        = opts.fetch(:namespace, :yard)
-
-      namespace ns do
-        task :clean do
-          rm_rf '.yardoc'
-        end
-
-        task :server => :clean do
-          cmd = ["yard server --reload"]
-          cmd << "--port=#{port}" if port 
-          sh(*cmd)
-        end
-
-        task :gems do
-          cmd = ["yard server --reload"]
-          cmd << "--port=#{gem_port}" if gem_port 
-          sh(*cmd)
-        end
-      end
+  # require some libaray we provide
+  def self.require_libs(*libs)
+    deps.each do |dep|
+      require File.expand_path(File.join('..', 'releaseops', dep), __FILE__)
     end
   end
 end
 
-require_relative 'releaseops/test_tasks'
-require_relative 'releaseops/simplecov'
+ReleaseOps.require_libs('yard_tasks', 'test_tasks', 'simplecov')
 
