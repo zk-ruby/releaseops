@@ -4,8 +4,8 @@ require 'rake/tasklib'
 module ReleaseOps
   # require some libaray we provide
   def self.require_libs(*libs)
-    deps.each do |dep|
-      require File.expand_path(File.join('..', 'releaseops', dep), __FILE__)
+    libs.each do |lib|
+      require File.expand_path(File.join('..', 'releaseops', lib), __FILE__)
     end
   end
 end
