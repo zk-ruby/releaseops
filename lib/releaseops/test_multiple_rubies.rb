@@ -1,3 +1,6 @@
+require 'rake'
+require 'rake/tasklib'
+
 module ReleaseOps
   module TestMultipleRubies
     def self.define_test_tasks_for(*rubies)
