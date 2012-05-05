@@ -3,6 +3,46 @@ require 'rake/tasklib'
 
 module ReleaseOps
   module TestTasks
+    extend ::Rake::DSL if defined?(::Rake::DSL)
+
+    def self.define_simple_default_for_travis
+      namespace :spec do
+        task :define do
+          require 'rubygems'
+          require 'bundler/setup'
+          require 'rspec/core/rake_task'
+
+          RSpec::Core::RakeTask.new('spec:runner') do |t|
+            t.rspec_opts = '-f d' if ENV['TRAVIS']
+          end
+        end
+
+        task :run => :define do
+          Rake::Task['spec:runner'].invoke
+        end
+      end
+
+      task :default => 'spec:run'
+    end
+    
+    # put in your gemspec
+    #
+    #   platform :mri_19 do
+    #     gem 'simplecov', :group => :coverage, :require => false
+    #   end
+    #
+    # creates a rake task "spec:coverage" and 'spec:cov' that do the same thing
+    # (i just like both names)
+    #
+    def self.define_simplecov_tasks
+      task 'spec:cov' do
+        ENV['RELEASEOPS_COVERAGE'] = 'true'
+        Rake::Task['spec:run'].invoke
+      end
+
+      task 'spec:coverage' => 'spec:cov'
+    end
+
     def self.define_for(*rubies)
       rubies.each do |r|
         TestOneRuby.new(:name => r) do |tor|

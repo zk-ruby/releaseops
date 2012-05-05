@@ -40,4 +40,5 @@ module ReleaseOps
 end
 
 require_relative 'releaseops/test_tasks'
+require_relative 'releaseops/simplecov'
 
