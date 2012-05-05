@@ -2,16 +2,15 @@ require 'rake'
 require 'rake/tasklib'
 
 module ReleaseOps
-  def self.define_test_tasks_for(*rubies)
-    rubies.each do |r|
-
-      TestMultipleRubies::TestOneRuby.new(:name => r) do |tor|
-        yield tor if block_given?
+  module TestTasks
+    def self.define_for(*rubies)
+      rubies.each do |r|
+        TestOneRuby.new(:name => r) do |tor|
+          yield tor if block_given?
+        end
       end
     end
-  end
 
-  module TestMultipleRubies
     class TestOneRuby < ::Rake::TaskLib
       include ::Rake::DSL if defined?(::Rake::DSL)
 
