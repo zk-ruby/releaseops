@@ -5,5 +5,5 @@ module ReleaseOps
 
 end
 
-require_relative 'test_multiple_rubies'
+require_relative 'releaseops/test_multiple_rubies'
 
