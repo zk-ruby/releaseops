@@ -21,13 +21,13 @@ module ReleaseOps
         end
 
         task :server => :clean do
-          cmd = ["yard server --reload"]
+          cmd = %w[bundle exec yard server --reload]
           cmd << "--port=#{port}" if port 
           sh(*cmd)
         end
 
         task :gems do
-          cmd = ["yard server --gemfile Gemfile --reload"]
+          cmd = %w[bundle exec yard server --gemfile=Gemfile]
           cmd << "--port=#{gem_port}" if gem_port 
           sh(*cmd)
         end
