@@ -27,7 +27,7 @@ module ReleaseOps
         end
 
         task :gems do
-          cmd = ["yard server --reload"]
+          cmd = ["yard server --gemfile Gemfile --reload"]
           cmd << "--port=#{gem_port}" if gem_port 
           sh(*cmd)
         end
