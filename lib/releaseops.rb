@@ -8,6 +8,10 @@ module ReleaseOps
       require File.expand_path(File.join('..', 'releaseops', lib), __FILE__)
     end
   end
+
+  def self.gem_files
+    FileList['*zookeeper-*.gem']
+  end
 end
 
 ReleaseOps.require_libs('yard_tasks', 'test_tasks', 'simplecov')
