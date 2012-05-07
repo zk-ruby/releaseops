@@ -1,5 +1,8 @@
 require 'rake'
 require 'rake/tasklib'
+require 'fileutils'
+require 'pathname'
+require 'rubygems'
 
 module ReleaseOps
   # require some libaray we provide
@@ -10,5 +13,6 @@ module ReleaseOps
   end
 end
 
-ReleaseOps.require_libs('yard_tasks', 'test_tasks', 'simplecov')
+ReleaseOps.require_libs('core_ext', 'yard_tasks', 'test_tasks', 'simplecov', 'mohel')
+
 
