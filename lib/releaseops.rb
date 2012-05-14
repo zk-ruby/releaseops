@@ -33,5 +33,5 @@ module ReleaseOps
   end
 end
 
-ReleaseOps.require_libs('yard_tasks', 'test_tasks', 'simplecov')
+ReleaseOps.require_libs('yard_tasks', 'test_tasks', 'simplecov', 'gem_tasks')
 
