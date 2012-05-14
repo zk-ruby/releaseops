@@ -1,45 +1,52 @@
+require 'rake'
+require 'rake/tasklib'
+
 module ReleaseOps
-  def self.create_gem_package_tasks(gemspec_name)
-    namespace :zk do
-      namespace :gems do
-        task :build do
-          require 'tmpdir'
+  module GemTasks
+    extend ::Rake::DSL if defined?(::Rake::DSL)
 
-          raise "You must specify a TAG" unless ENV['TAG']
+    def self.define(gemspec_name)
+      namespace :zk do
+        namespace :gems do
+          task :build do
+            require 'tmpdir'
 
-          prefix = gemspec_name.split('.').first
+            raise "You must specify a TAG" unless ENV['TAG']
 
-          ReleaseOps.with_tmpdir(:prefix => prefix) do |tmpdir|
-            tag = ENV['TAG']
+            prefix = gemspec_name.split('.').first
 
-            sh "git clone . #{tmpdir}"
+            ReleaseOps.with_tmpdir(:prefix => prefix) do |tmpdir|
+              tag = ENV['TAG']
 
-            orig_dir = Dir.getwd
+              sh "git clone . #{tmpdir}"
 
-            cd tmpdir do
-              sh "git co #{tag} && git reset --hard && git clean -fdx"
+              orig_dir = Dir.getwd
 
-              sh "rvm 1.8.7 do gem build #{gemspec_name}"
+              cd tmpdir do
+                sh "git co #{tag} && git reset --hard && git clean -fdx"
 
-              mv FileList['*.gem'], orig_dir
+                sh "rvm 1.8.7 do gem build #{gemspec_name}"
+
+                mv FileList['*.gem'], orig_dir
+              end
             end
           end
-        end
 
-        task :push do
-          gems = FileList['*.gem']
-          raise "No gemfiles to push!" if gems.empty?
+          task :push do
+            gems = FileList['*.gem']
+            raise "No gemfiles to push!" if gems.empty?
 
-          gems.each do |gem|
-            sh "gem push #{gem}"
+            gems.each do |gem|
+              sh "gem push #{gem}"
+            end
           end
-        end
 
-        task :clean do
-          rm_rf FileList['*.gem']
-        end
+          task :clean do
+            rm_rf FileList['*.gem']
+          end
 
-        task :all => [:build, :push, :clean]
+          task :all => [:build, :push, :clean]
+        end
       end
     end
   end
