@@ -85,7 +85,7 @@ module ReleaseOps
         :build_task_name,
         :bundle_task_name,
         :rspec_task_name,
-        :phony_gemfile_link_name,
+        :phony_gemfile_name,
         :phony_gemfile_lock_name
 
 
@@ -125,8 +125,8 @@ module ReleaseOps
         @build_task_name          = "#{namespace}:#{name}:build"
         @bundle_task_name         = "#{namespace}:#{name}:bundle_install"
         @rspec_task_name          = "#{namespace}:#{name}:run_rspec"
-        @phony_gemfile_link_name  = "Gemfile.#{name}"
-        @phony_gemfile_lock_name  = "#{phony_gemfile_link_name}.lock"
+        @phony_gemfile_name       = "Gemfile.#{name}"
+        @phony_gemfile_lock_name  = "#{phony_gemfile_name}.lock"
 
         define_tasks
       end
@@ -136,10 +136,19 @@ module ReleaseOps
           name != 'jruby' && File.directory?('./ext')
         end
 
+        BUNDLER_VARS = %w(BUNDLE_GEMFILE RUBYOPT BUNDLE_BIN_PATH)
+
+        def with_clean_env
+          orig_env = ENV.to_hash
+          BUNDLER_VARS.each { |k| ENV.delete(k) }
+          yield
+        ensure
+          ENV.replace(orig_env)
+        end
+
         def define_tasks
-          file phony_gemfile_link_name do
-            # apparently, rake doesn't deal with symlinks intelligently :P
-            ln_s('Gemfile', phony_gemfile_link_name) unless File.symlink?(phony_gemfile_link_name)
+          file phony_gemfile_name do
+            ln_s('Gemfile', phony_gemfile_name) unless test(?l, phony_gemfile_name)
           end
 
           task :clean do
@@ -174,12 +183,16 @@ module ReleaseOps
             end
           end
 
-          task bundle_task_name => [phony_gemfile_link_name, build_task_name] do
-            sh "rvm #{ruby_with_gemset} do bundle install --gemfile #{phony_gemfile_link_name}"
+          task bundle_task_name => [phony_gemfile_name, build_task_name] do
+            with_clean_env do
+              sh "rvm #{ruby_with_gemset} do bundle install --gemfile #{phony_gemfile_name}"
+            end
           end
 
           task rspec_task_name => bundle_task_name do
-            sh "rvm #{ruby_with_gemset} do env BUNDLE_GEMFILE=#{phony_gemfile_link_name} bundle exec rspec spec --fail-fast"
+            with_clean_env do
+              sh "rvm #{ruby_with_gemset} do env BUNDLE_GEMFILE=#{phony_gemfile_name} bundle exec rspec spec --fail-fast"
+            end
           end
 
           task "#{namespace}:#{name}" => rspec_task_name
