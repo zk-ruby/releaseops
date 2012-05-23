@@ -147,8 +147,9 @@ module ReleaseOps
         end
 
         def define_tasks
-          file phony_gemfile_name do
-            ln_s('Gemfile', phony_gemfile_name) unless test(?l, phony_gemfile_name)
+          file phony_gemfile_name => 'Gemfile' do
+#             ln_s('./Gemfile', phony_gemfile_name) unless test(?l, phony_gemfile_name)
+            cp 'Gemfile', phony_gemfile_name
           end
 
           task :clean do
