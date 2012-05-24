@@ -176,21 +176,24 @@ module ReleaseOps
             end
           end
 
-          task build_task_name => [create_gemset_name, clean_task_name] do
-            if need_ext_build?
-              cd 'ext' do
-                sh "rvm #{ruby_with_gemset} do rake build"
-              end
-            end
-          end
-
-          task bundle_task_name => [phony_gemfile_name, build_task_name] do
+          task bundle_task_name => [phony_gemfile_name] do
             with_clean_env do
               sh "rvm #{ruby_with_gemset} do bundle install --gemfile #{phony_gemfile_name}"
             end
           end
 
-          task rspec_task_name => bundle_task_name do
+
+          task build_task_name => [create_gemset_name, clean_task_name, bundle_task_name] do
+            if need_ext_build?
+              with_clean_env do
+                cd 'ext' do
+                  sh "rvm #{ruby_with_gemset} do rake build"
+                end
+              end
+            end
+          end
+
+          task rspec_task_name => build_task_name do
             with_clean_env do
               sh "rvm #{ruby_with_gemset} do env BUNDLE_GEMFILE=#{phony_gemfile_name} bundle exec rspec spec --fail-fast"
             end
