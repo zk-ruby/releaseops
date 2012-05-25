@@ -84,6 +84,7 @@ module ReleaseOps
         :clean_task_name,
         :build_task_name,
         :bundle_task_name,
+        :only_rspec_task_name,
         :rspec_task_name,
         :phony_gemfile_name,
         :phony_gemfile_lock_name
@@ -124,6 +125,7 @@ module ReleaseOps
         @clean_task_name          = "#{namespace}:#{name}:clean"
         @build_task_name          = "#{namespace}:#{name}:build"
         @bundle_task_name         = "#{namespace}:#{name}:bundle_install"
+        @only_rspec_task_name     = "#{namespace}:#{name}:only_rspec"
         @rspec_task_name          = "#{namespace}:#{name}:run_rspec"
         @phony_gemfile_name       = "Gemfile.#{name}"
         @phony_gemfile_lock_name  = "#{phony_gemfile_name}.lock"
@@ -193,11 +195,13 @@ module ReleaseOps
             end
           end
 
-          task rspec_task_name => build_task_name do
+          task only_rspec_task_name do
             with_clean_env do
               sh "rvm #{ruby_with_gemset} do env BUNDLE_GEMFILE=#{phony_gemfile_name} bundle exec rspec spec --fail-fast"
             end
           end
+
+          task rspec_task_name => [build_task_name, only_rspec_task_name]
 
           task "#{namespace}:#{name}" => rspec_task_name
 
