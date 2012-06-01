@@ -148,6 +148,14 @@ module ReleaseOps
           ENV.replace(orig_env)
         end
 
+        def with_env(hash)
+          orig_env = ENV.to_hash
+          hash.each { |k,v| ENV[k] = v }
+          yield
+        ensure
+          ENV.replace(orig_env)
+        end
+
         def define_tasks
           file phony_gemfile_name => 'Gemfile' do
 #             ln_s('./Gemfile', phony_gemfile_name) unless test(?l, phony_gemfile_name)
@@ -197,7 +205,15 @@ module ReleaseOps
 
           task only_rspec_task_name do
             with_clean_env do
-              sh "rvm #{ruby_with_gemset} do env BUNDLE_GEMFILE=#{phony_gemfile_name} bundle exec rspec spec --fail-fast"
+              cmd = "rvm #{ruby_with_gemset} do env BUNDLE_GEMFILE=#{phony_gemfile_name} bundle exec rspec spec --fail-fast"
+              if rvm_ruby_name == 'jruby'
+                %w[1.8 1.9].each do |flava|
+                  $stderr.puts "testing JRUBY_OPTS=--#{flava}"
+                  with_env('JRUBY_OPTS' => "--#{flava}") { sh(cmd) }
+                end
+              else
+                sh(cmd)
+              end
             end
           end
 
