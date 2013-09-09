@@ -25,7 +25,7 @@ module ReleaseOps
               cd tmpdir do
                 sh "git co #{tag} && git reset --hard && git clean -fdx"
 
-                sh "rvm 1.8.7 do gem build #{gemspec_name}"
+                sh "gem build #{gemspec_name}"
 
                 mv FileList['*.gem'], orig_dir
               end
